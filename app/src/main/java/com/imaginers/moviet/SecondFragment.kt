@@ -7,9 +7,13 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.imaginers.moviet.data.Word
 import com.imaginers.moviet.databinding.FragmentSecondBinding
+import kotlinx.android.synthetic.main.fragment_second.*
 import kotlinx.android.synthetic.main.fragment_second.view.*
 
 /**
@@ -17,45 +21,44 @@ import kotlinx.android.synthetic.main.fragment_second.view.*
  */
 class SecondFragment : Fragment() {
 
-
-    private var _binding: FragmentSecondBinding? = null
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    private lateinit var wordViewModel: WordViewModel
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding = FragmentSecondBinding.inflate(inflater, container, false)
-        val view = binding.root
-        return view
+        return inflater.inflate(R.layout.fragment_second, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.button_second.setOnClickListener {
-            val replyIntent = Intent()
-            if (TextUtils.isEmpty(view.name_field.text)) {
-                activity?.setResult(Activity.RESULT_CANCELED, replyIntent)
-            } else {
-                val word = view.name_field.text.toString()
-                replyIntent.putExtra(EXTRA_REPLY, word)
-                activity?.setResult(Activity.RESULT_OK, replyIntent)
-            }
-            findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
-        }
-    }
-    companion object {
-        const val EXTRA_REPLY = "com.example.android.wordlistsql.REPLY"
-    }
+        wordViewModel = ViewModelProvider(this).get(WordViewModel::class.java)
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        button_second.setOnClickListener {
+
+            if (name_field.text.toString().isNotEmpty() && description_field.text.toString()
+                    .isNotEmpty() && concept_field.text.toString().isNotEmpty()
+            ) {
+                wordViewModel.insertWord(
+                    Word(
+                        null,
+                        name_field.text.toString(),
+                        description_field.text.toString(),
+                        concept_field.text.toString()
+                    )
+                )
+                findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
+            } else {
+                Toast.makeText(
+                    context,
+                    "Bro, you have to insert all the fields lol!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
 }
